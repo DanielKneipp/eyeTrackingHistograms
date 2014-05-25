@@ -1,0 +1,18 @@
+###### Qt ######
+*.pro*
+
+###### Eclipse ######
+.cproject
+.project
+.settings/
+.metadata/
+Debug/
+Release/
+
+###### Visual Studio ######
+*.vcxproj*
+x64/
+*.aps
+
+###### Outros ######
+Video/
