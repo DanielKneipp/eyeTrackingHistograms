@@ -89,13 +89,16 @@ int main(int argn, char **argc)
 
 	cv::Scalar color(0,255,0);//verde
 
-	if (argn > 1)
+    if (argn > 1)
 		cap.open(argc[1]); // Ler um arquivo de vídeo
 	else
 		cap.open(0); // 
 
 	if (!cap.isOpened())
+    {
+        std::cout << "Falha ao abrir arquivo ou ativar a webcam" << std::endl;
 		return EXIT_FAILURE;
+    }
 
 	/// Trabalha com no máximo 33 frames por segundo
 	fps = ((cap.get(CV_CAP_PROP_FPS) < 33.0) ? cap.get(CV_CAP_PROP_FPS) : 33.0);
@@ -121,7 +124,7 @@ int main(int argn, char **argc)
 			if (argn > 1)
 			{
 				cap.set(CV_CAP_PROP_POS_FRAMES, 0); /// Começar o vídeo denovo
-				cap >> frame;
+                cap >> frame;
 			}
 			else
 				break;
@@ -279,8 +282,8 @@ int main(int argn, char **argc)
             cv::rectangle(frame, eye_bb, color);
         }
 
-        //cv::putText(frame,std::to_string(contaPiscada) + std::string(" piscadas"),
-        //	cv::Point(30,30), CV_FONT_NORMAL, 1, cv::Scalar(255,255,255));
+        cv::putText(frame,std::to_string(contaPiscada) + std::string(" piscadas"),
+            cv::Point(30,30), CV_FONT_NORMAL, 1, cv::Scalar(255,255,255));
         cv::imshow("video", frame);
 
 		key = cv::waitKey(1000/fps);
