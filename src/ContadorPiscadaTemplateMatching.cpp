@@ -77,7 +77,11 @@ int main(int argn, char **argc)
 	int lim_comp_hist_int = 194;
     cv::Rect eye_bb;  // The eye bounding box
 	cv::Mat img_eye_bb;
+
 	double fps;
+
+    std::vector<cv::Vec3f> circles;
+    bool find_circles = false;
 
 	cv::Mat olhosAbertos;
 	cv::MatND histOlhosAbertos;
@@ -237,6 +241,15 @@ int main(int argn, char **argc)
 				useMask = !useMask;
 			}
 
+            else if (key == 'c')
+            {
+                if(find_circles)
+                    find_circles = false;
+                else
+                    find_circles = true;
+
+            }
+
 			if (!olhosAbertos.empty() && !olhosFechados.empty())
 			{
 				//double base_base = compareHist(histEye_bb, histEye_bb, CV_COMP_BHATTACHARYYA); // sempre = 0
@@ -278,6 +291,23 @@ int main(int argn, char **argc)
 				cv::imshow("Back Projection | Saturation", back_projections_HSV[1]);
 				cv::imshow("Back Projection | Value", back_projections_HSV[2]);
 			}
+            if (find_circles)
+            {
+                /// Reduce the noise so we avoid false circle detection
+                GaussianBlur( img_eye_bb, img_eye_bb, cv::Size(9, 9), 2, 2 );
+                /// Apply the Hough Transform to find the circles
+                HoughCircles( img_eye_bb, circles, CV_HOUGH_GRADIENT, 1, img_eye_bb.rows/8, 200, 100, 0, 0 );
+                /// Draw the circles detected
+                for( size_t i = 0; i < circles.size(); i++ )
+                {
+                    cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+                    int radius = cvRound(circles[i][2]);
+                    // circle center
+                    cv::circle( frame, center + cv::Point(eye_bb.x, eye_bb.y), 3, cv::Scalar(0,255,0), -1, 8, 0 );
+                    // circle outline
+                    cv::circle( frame, center + cv::Point(eye_bb.x, eye_bb.y), radius, cv::Scalar(255,0,0), 3, 8, 0 );
+                }
+            }
 
             cv::rectangle(frame, eye_bb, color);
         }
@@ -286,7 +316,7 @@ int main(int argn, char **argc)
             cv::Point(30,30), CV_FONT_NORMAL, 1, cv::Scalar(255,255,255));
         cv::imshow("video", frame);
 
-		key = cv::waitKey(1000/fps);
+        key = cv::waitKey(1000.0/fps);
 		if (key == 'r') 
 		{
 			contAltOlho = 0;
